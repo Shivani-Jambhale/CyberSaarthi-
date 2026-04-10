@@ -405,8 +405,6 @@ export default function UPISimulation() {
   );
 
   // Step 5: Make Payment
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentStep, setPaymentStep] = useState(0);
 
   const renderMakePayment = () => (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
