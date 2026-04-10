@@ -5,9 +5,10 @@ interface Message {
   content: string;
 }
 
-const API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
-const API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-3-5-sonnet-20241022";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+const MODEL = "gemini-2.5-flash";
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+const STREAM_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent`;
 
 // System prompt for the AI assistant
 const SYSTEM_PROMPT = `You are a helpful AI assistant for CyberSaarthi, an app dedicated to digital safety and cybersecurity education.
@@ -37,78 +38,71 @@ export interface AIResponse {
   error?: string;
 }
 
-// Send message to Claude API
+const toGeminiHistory = (messages: Message[]) =>
+  messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+// Send message to Gemini API
 export const sendMessageToAI = async (
   conversationHistory: Message[]
 ): Promise<AIResponse> => {
   if (!API_KEY) {
     return {
       success: false,
-      error: "API key not configured. Please set VITE_CLAUDE_API_KEY environment variable.",
+      error: "API key not configured. Please set VITE_GEMINI_API_KEY in .env.local",
     };
   }
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
       method: "POST",
-      headers: {
-        "x-api-key": API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: conversationHistory,
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: toGeminiHistory(conversationHistory),
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      console.error("Claude API Error:", error);
+      console.error("Gemini API Error:", error);
 
-      // Handle specific error cases
-      if (response.status === 401) {
-        return {
-          success: false,
-          error: "Invalid API key. Please check your configuration.",
-        };
+      if (response.status === 400) {
+        return { success: false, error: "Invalid request. Please try again." };
       }
-
+      if (response.status === 403) {
+        return { success: false, error: "Invalid API key. Please check your configuration." };
+      }
       if (response.status === 429) {
-        return {
-          success: false,
-          error: "Rate limited. Please wait a moment and try again.",
-        };
+        return { success: false, error: "Rate limited. Please wait a moment and try again." };
       }
 
       return {
         success: false,
-        error: error.message || "Failed to get response from AI",
+        error: error?.error?.message || "Failed to get response from AI",
       };
     }
 
     const data = await response.json();
-    const assistantMessage = data.content[0].text;
+    const message = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    return {
-      success: true,
-      message: assistantMessage,
-    };
+    if (!message) {
+      return { success: false, error: "No response received from AI" };
+    }
+
+    return { success: true, message };
   } catch (error) {
-    console.error("Error calling Claude API:", error);
+    console.error("Error calling Gemini API:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to connect to AI service",
+      error: error instanceof Error ? error.message : "Failed to connect to AI service",
     };
   }
 };
 
-// Stream response from Claude API (for better UX with longer responses)
+// Stream response from Gemini API
 export const streamMessageFromAI = async (
   conversationHistory: Message[],
   onChunk: (chunk: string) => void,
@@ -116,32 +110,23 @@ export const streamMessageFromAI = async (
   onError: (error: string) => void
 ): Promise<void> => {
   if (!API_KEY) {
-    onError(
-      "API key not configured. Please set VITE_CLAUDE_API_KEY environment variable."
-    );
+    onError("API key not configured. Please set VITE_GEMINI_API_KEY in .env.local");
     return;
   }
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${STREAM_URL}?key=${API_KEY}&alt=sse`, {
       method: "POST",
-      headers: {
-        "x-api-key": API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: conversationHistory,
-        stream: true,
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: toGeminiHistory(conversationHistory),
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      onError(error.message || "Failed to get response from AI");
+      onError(error?.error?.message || "Failed to get response from AI");
       return;
     }
 
@@ -162,15 +147,14 @@ export const streamMessageFromAI = async (
       const lines = buffer.split("\n");
 
       for (let i = 0; i < lines.length - 1; i++) {
-        const line = lines[i];
+        const line = lines[i].trim();
         if (line.startsWith("data: ")) {
-          const data = JSON.parse(line.slice(6));
-
-          if (
-            data.type === "content_block_delta" &&
-            data.delta.type === "text_delta"
-          ) {
-            onChunk(data.delta.text);
+          try {
+            const data = JSON.parse(line.slice(6));
+            const chunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (chunk) onChunk(chunk);
+          } catch {
+            // skip malformed chunks
           }
         }
       }
@@ -180,16 +164,9 @@ export const streamMessageFromAI = async (
 
     onComplete();
   } catch (error) {
-    console.error("Error streaming from Claude API:", error);
-    onError(
-      error instanceof Error
-        ? error.message
-        : "Failed to connect to AI service"
-    );
+    console.error("Error streaming from Gemini API:", error);
+    onError(error instanceof Error ? error.message : "Failed to connect to AI service");
   }
 };
 
-// Validate if API is configured
-export const isAIConfigured = (): boolean => {
-  return !!API_KEY;
-};
+export const isAIConfigured = (): boolean => !!API_KEY;
