@@ -2,11 +2,11 @@
 
 ## 🤖 What's New?
 
-The AI Assistant is now **truly responsive** and uses **Claude AI** to answer your questions intelligently! Instead of static responses, it actually understands your questions and provides relevant, detailed answers about cybersecurity.
+The AI Assistant is now **truly responsive** and uses **Google Gemini** to answer your questions intelligently! Instead of static responses, it actually understands your questions and provides relevant, detailed answers about cybersecurity.
 
 ## ✨ Features
 
-✅ **Real AI Responses** - Uses Anthropic's Claude model for intelligent answers
+✅ **Real AI Responses** - Uses Google's Gemini model for intelligent answers
 ✅ **Context Aware** - Understands conversation history
 ✅ **Loading States** - Shows "Thinking..." while processing
 ✅ **Error Handling** - Gracefully handles errors with helpful messages
@@ -16,13 +16,12 @@ The AI Assistant is now **truly responsive** and uses **Claude AI** to answer yo
 
 ## 🚀 Setup Instructions
 
-### Step 1: Get Claude API Key
+### Step 1: Get Gemini API Key
 
-1. Go to [https://console.anthropic.com](https://console.anthropic.com)
-2. Sign up or log in
-3. Navigate to **API Keys** section
-4. Click **Create New API Key**
-5. Copy the key (save it somewhere safe)
+1. Go to [https://makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+2. Sign up or log in with your Google account
+3. Click **Create API Key**
+4. Copy the key (save it somewhere safe)
 
 ### Step 2: Configure Environment Variables
 
@@ -34,7 +33,7 @@ cd c:\Users\DELL\Downloads\CyberSaarthi--main\CyberSaarthi--main
 
 Create `.env.local`:
 ```
-VITE_CLAUDE_API_KEY=sk-ant-xxxxx... (paste your API key here)
+VITE_GEMINI_API_KEY=AIza... (paste your API key here)
 ```
 
 ### Step 3: Restart Development Server
@@ -45,13 +44,13 @@ npm run dev
 
 The AI Assistant will now be fully functional!
 
-## 💰 Pricing (Anthropic Claude API)
+## 💰 Pricing (Google Gemini API)
 
 - **Free tier**: Limited requests, good for testing
-- **Pay-as-you-go**: Very affordable (~$0.003 per message)
+- **Pay-as-you-go**: Very affordable starting at $0.075 per 1M input tokens
 - **No credit card required** to sign up for free tier
 
-See pricing at: https://www.anthropic.com/pricing
+See pricing at: https://ai.google.dev/pricing
 
 ## 📝 How It Works Now
 
@@ -88,7 +87,7 @@ AI: "To protect your UPI account:
 ✅ **No tracking** - Your conversations are private
 ✅ **HTTPS only** - Encrypted communication
 ✅ **API key secure** - Never sent to frontend, only .env file
-✅ **Anthropic privacy** - See https://www.anthropic.com/privacy
+✅ **Google privacy** - See https://policies.google.com/privacy
 
 ## 🛠️ How to Use
 
@@ -102,20 +101,20 @@ AI: "To protect your UPI account:
 ## ⚙️ Configuration Files
 
 **Created/Modified Files:**
-- `src/app/services/aiService.ts` - Claude API integration
+- `src/app/services/aiService.ts` - Gemini API integration
 - `src/app/screens/AIAssistant.tsx` - Updated UI with loading states
 - `.env.local` - Your API key (YOU CREATE THIS)
 
 ## 🚨 Troubleshooting
 
 ### "API key not configured" error?
-→ Create `.env.local` file and add `VITE_CLAUDE_API_KEY`
+→ Create `.env.local` file and add `VITE_GEMINI_API_KEY`
 
 ### "Invalid API key" error?
 → Check you copied the full API key correctly
 
 ### Responses are slow?
-→ Claude might be processing. Wait 5-10 seconds.
+→ Gemini might be processing. Wait 5-10 seconds.
 → Check your internet connection
 
 ### Getting rate limited?
@@ -131,13 +130,13 @@ User: "What is phishing?"
         ↓
    [AI Processing...]
         ↓
-Claude: "Phishing is a type of cyber attack..."
+Gemini: "Phishing is a type of cyber attack..."
         ↓
 User: "How can I protect myself?"
         ↓
    [AI uses previous context]
         ↓
-Claude: "Here are ways to protect from phishing..."
+Gemini: "Here are ways to protect from phishing..."
 ```
 
 The AI remembers the conversation context!
@@ -166,9 +165,9 @@ Ask questions naturally - the AI understands!
 
 ## 📞 Support
 
-- Claude API docs: https://docs.anthropic.com
-- Report issues: Check API status at console.anthropic.com
-- Get help: https://support.anthropic.com
+- Gemini API docs: https://ai.google.dev/docs
+- Report issues: Check API status at makersuite.google.com
+- Get help: https://support.google.com
 
 ## Next Steps
 
