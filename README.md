@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
   # CyberSaarthi Mobile App
 
@@ -9,3 +10,6 @@
 
   Run `npm run dev` to start the development server.
   
+=======
+# CyberSaarthi-
+>>>>>>> d7f856e97f923f04d5b26b8effeb28f7546b99e7
