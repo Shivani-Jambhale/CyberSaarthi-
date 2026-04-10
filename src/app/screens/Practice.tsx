@@ -24,12 +24,6 @@ const practices = [
     color: "#4a90e2",
     route: "/app-permissions",
   },
-  {
-    icon: <Phone className="w-8 h-8" />,
-    title: "Scam ID with AI",
-    description: "Practice spotting fake calls & texts",
-    color: "#e07b39",
-  },
 ];
 
 export default function Practice() {

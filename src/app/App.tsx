@@ -4,6 +4,7 @@ import { router } from "./routes";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { registerServiceWorker } from "./services/serviceWorkerService";
+import { Toaster } from "sonner";
 
 export default function App() {
   useEffect(() => {
@@ -15,6 +16,7 @@ export default function App() {
     <LanguageProvider>
       <AuthProvider>
         <RouterProvider router={router} />
+          <Toaster position="bottom-center" richColors />
       </AuthProvider>
     </LanguageProvider>
   );

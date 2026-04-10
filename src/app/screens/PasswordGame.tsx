@@ -292,7 +292,7 @@ export default function PasswordGame() {
                   <button
                     onClick={() => {
                       setShowCompletionPopup(false);
-                      navigate("/");
+                      navigate("/home");
                     }}
                     className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                   >
@@ -446,7 +446,7 @@ export default function PasswordGame() {
                 )}
               </button>
             </div>
-            
+
             {/* Strength Meter */}
             {password && (
               <div className="mb-4">
